@@ -28,12 +28,14 @@ go-depsync --gomod /path/to/go.mod --parent go.k6.io/k6
 
 ```console
 $ go-depsync --parent=go.k6.io/k6
-2023/11/17 12:59:01 Found parent go.k6.io/k6@v0.46.0
-2023/11/17 12:59:01 Mismatched versions for github.com/spf13/afero: v1.2.2 (this package) -> v1.1.2 (parent)
-2023/11/17 12:59:01 Mismatched versions for golang.org/x/sys: v0.11.0 (this package) -> v0.9.0 (parent)
-2023/11/17 12:59:01 Mismatched versions for github.com/spf13/cobra: v1.5.0 (this package) -> v1.4.0 (parent)
-2023/11/17 12:59:01 Mismatched versions for google.golang.org/grpc: v1.57.0 (this package) -> v1.56.1 (parent)
-go get github.com/spf13/afero@v1.1.2 golang.org/x/sys@v0.9.0 github.com/spf13/cobra@v1.4.0 google.golang.org/grpc@v1.56.1
+2023/11/17 15:02:56 Found parent go.k6.io/k6@v0.46.0
+  DEPENDENCY              CURRENT VERSION  NEW VERSION
+  google.golang.org/grpc  v1.57.0          v1.56.1
+  github.com/spf13/cobra  v1.5.0           v1.4.0
+  golang.org/x/sys        v0.11.0          v0.9.0
+  github.com/spf13/afero  v1.2.2           v1.1.2
+
+go get google.golang.org/grpc@v1.56.1 github.com/spf13/cobra@v1.4.0 golang.org/x/sys@v0.9.0 github.com/spf13/afero@v1.1.2
 ```
 
 The final line includes the `go get` command that, when run, will sync the versions of commons dependencies to those of the parent. `go-depsync` outputs this line to `stdout` so it can be piped to a shell, or redirected to a script for later use.
