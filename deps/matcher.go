@@ -2,7 +2,6 @@ package deps
 
 import (
 	"fmt"
-	"log"
 )
 
 // Mismatched looks at the dependencies of a package and its parent, and returns the dependencies that are present in
@@ -20,7 +19,6 @@ func Mismatched(own, parent Dependencies) Dependencies {
 			continue
 		}
 
-		log.Printf("Mismatched versions for %s: %s (this package) -> %s (parent)", dep, version, parentVersion)
 		mismatched[dep] = parentVersion
 	}
 
