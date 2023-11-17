@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/grafana/go-depsync/deps"
 )
@@ -35,5 +36,13 @@ func main() {
 		log.Fatalf("Cannot parse dependencies of %q: %v", *parent, err)
 	}
 
-	fmt.Println(deps.GoGetCommand(deps.Mismatched(ownDeps, parentDeps)))
+	mismatched := deps.Mismatched(ownDeps, parentDeps)
+	if len(mismatched) == 0 {
+		return
+	}
+
+	deps.WriteVersionTable(os.Stderr, ownDeps, mismatched)
+	fmt.Fprintln(os.Stderr)
+
+	fmt.Println(deps.GoGetCommand(mismatched))
 }

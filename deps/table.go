@@ -12,6 +12,13 @@ import (
 // This function is meant to be called with the output of Match as the value of new.
 func WriteVersionTable(w io.Writer, old, new Dependencies) {
 	tw := tablewriter.NewWriter(w)
+	tw.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	tw.SetHeaderLine(false)
+	tw.SetAutoFormatHeaders(true)
+	tw.SetBorder(false)
+	tw.SetCenterSeparator("")
+	tw.SetColumnSeparator("")
+	tw.SetRowSeparator("")
 
 	tw.SetHeader([]string{"Dependency", "Current version", "New version"})
 	for dep, v := range new {
