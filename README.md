@@ -9,7 +9,7 @@ It is useful for extensions and plugins that are built together with a core pack
 `go-depsync` can be installed using `go install`:
 
 ```console
-$ go install github.com/grafana/go-depsync
+$ go install github.com/grafana/go-depsync@latest
 ```
 
 After that, it is ready to be used:
