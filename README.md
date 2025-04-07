@@ -18,7 +18,7 @@ After that, it is ready to be used:
 go-depsync --parent go.k6.io/k6
 ```
 
-You may also do a versioned sync:
+In some cases a package may not directly import the parent but still needs to maintain compatibility with the parent package.  This is more useful in the case of go plugin development:
 
 ```bash
 go-depsync --parent go.k6.io/k6@v1.0.0-rc1
