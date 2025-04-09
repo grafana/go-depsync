@@ -18,6 +18,12 @@ After that, it is ready to be used:
 go-depsync --parent go.k6.io/k6
 ```
 
+In some cases a package may not directly import the parent but still needs to maintain compatibility with the parent package.  This is more useful in the case of go plugin development:
+
+```bash
+go-depsync --parent go.k6.io/k6@v1.0.0-rc1
+```
+
 If the `go.mod` file for the local package is not on the working directory, a path to it can also be specified:
 
 ```bash

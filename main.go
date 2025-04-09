@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/grafana/go-depsync/deps"
 )
@@ -26,7 +27,13 @@ func main() {
 
 	parentVer, hasParent := ownDeps[*parent]
 	if !hasParent {
-		log.Fatalf("Parent package %q not found in local go.mod %q", *parent, *gomod)
+		if strings.Contains(*parent, "@") {
+			parentParts := strings.Split(*parent, "@")
+			*parent = parentParts[0]
+			parentVer = parentParts[1]
+		} else {
+			log.Fatalf("Parent package %q not found in local go.mod %q", *parent, *gomod)
+		}
 	}
 
 	log.Printf("Found parent %s@%s", *parent, parentVer)
