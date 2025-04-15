@@ -12,6 +12,7 @@ import (
 func main() {
 	gomod := flag.String("gomod", "./go.mod", "Path to the local go.mod file")
 	parent := flag.String("parent", "", "Name of the parent package to sync dependencies with")
+	parentVer := flag.String("version", "", "Version of parent package")
 	flag.Parse()
 
 	if *parent == "" {
@@ -24,14 +25,18 @@ func main() {
 		log.Fatalf("Couldn't parse own dependencies: %v", err)
 	}
 
-	parentVer, hasParent := ownDeps[*parent]
-	if !hasParent {
-		log.Fatalf("Parent package %q not found in local go.mod %q", *parent, *gomod)
+	if *parentVer != "" {
+		log.Printf("Using parent %s@%s", *parent, *parentVer)
+	} else {
+		parentVer, hasParent := ownDeps[*parent]
+		if !hasParent {
+			log.Fatalf("Parent package %q not found in local go.mod %q", *parent, *gomod)
+		}
+
+		log.Printf("Found parent %s@%s", *parent, parentVer)
 	}
 
-	log.Printf("Found parent %s@%s", *parent, parentVer)
-
-	parentDeps, err := deps.FromModule(*parent, parentVer)
+	parentDeps, err := deps.FromModule(*parent, *parentVer)
 	if err != nil {
 		log.Fatalf("Cannot parse dependencies of %q: %v", *parent, err)
 	}
