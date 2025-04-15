@@ -36,23 +36,23 @@ func Test_FromPackage(t *testing.T) {
 	t.Parallel()
 
 	for _, tc := range []struct {
-		pacakge string
+		target string
 		version string
 	}{
 		{
-			pacakge: "go.k6.io/k6",
+			target: "go.k6.io/k6",
 			version: "v0.47.0",
 		},
 		{
-			pacakge: "github.com/prometheus/prometheus",
+			target: "github.com/prometheus/prometheus",
 			version: "v0.35.0",
 		},
 	} {
 		tc := tc
-		t.Run(tc.pacakge, func(t *testing.T) {
+		t.Run(tc.target, func(t *testing.T) {
 			t.Parallel()
 
-			dependencies, err := deps.FromModule(tc.pacakge, tc.version)
+			dependencies, err := deps.FromModule(tc.target, tc.version)
 			if err != nil {
 				t.Fatalf("fetching dependencies: %v", err)
 			}

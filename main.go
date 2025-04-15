@@ -9,36 +9,72 @@ import (
 	"github.com/grafana/go-depsync/deps"
 )
 
+const long = `
+synchronizes dependencies between two go modules
+
+shows the diff between the current module and an target module and the go command(s)
+required to synchronize them.
+
+If the version of the target module is not explicitly defined, it is obtained from the
+the module's dependencies.
+
+This tools is useful when a module is used as a dependency in another module (the target),
+to ensure it won't introduce unwanted dependency upgrades.
+`
+
+// print usage message
+func printHelp() {
+	fmt.Printf("Usage of %s:\n", os.Args[0])
+	fmt.Print(long)
+	flag.PrintDefaults()
+}
+
 func main() {
-	gomod := flag.String("gomod", "./go.mod", "Path to the local go.mod file")
-	parent := flag.String("parent", "", "Name of the parent package to sync dependencies with")
-	parentVer := flag.String("version", "", "Version of parent package")
+	var (
+		gomod    string
+		target string
+		version  string
+		usage    bool
+	)
+
+	flag.StringVar(&gomod, "gomod", "./go.mod", "Path to the local go.mod file")
+	flag.StringVar(&target, "parent", "", "Deprecated. Use '-target' instead")
+	flag.StringVar(&target, "target", "", "Name of the package to sync dependencies with")
+	flag.StringVar(&version, "version", "", "Version of target package. If not defined it is obtained from the local go.mod")
+	flag.BoolVar(&usage, "usage", false, "display long help")
 	flag.Parse()
 
-	if *parent == "" {
-		flag.Usage()
-		log.Fatalf("You must specify the name of the parent package")
+	if usage {
+		printHelp()
+		return
 	}
 
-	ownDeps, err := deps.FromGomodFile(*gomod)
+	if target == "" {
+		flag.Usage()
+		log.Fatalf("You must specify the name of the target package")
+	}
+
+	ownDeps, err := deps.FromGomodFile(gomod)
 	if err != nil {
 		log.Fatalf("Couldn't parse own dependencies: %v", err)
 	}
 
-	if *parentVer != "" {
-		log.Printf("Using parent %s@%s", *parent, *parentVer)
-	} else {
-		parentVer, hasParent := ownDeps[*parent]
+	if version == "" {
+		hasParent := false
+		version, hasParent = ownDeps[target]
 		if !hasParent {
-			log.Fatalf("Parent package %q not found in local go.mod %q", *parent, *gomod)
+			flag.Usage()
+			log.Fatalf("target version not specified and target module not found as a dependency")
 		}
 
-		log.Printf("Found parent %s@%s", *parent, parentVer)
+		log.Printf("Found target %s@%s", target, version)
 	}
 
-	parentDeps, err := deps.FromModule(*parent, *parentVer)
+	log.Printf("synchronizing with target %s@%s", target, version)
+
+	parentDeps, err := deps.FromModule(target, version)
 	if err != nil {
-		log.Fatalf("Cannot parse dependencies of %q: %v", *parent, err)
+		log.Fatalf("Cannot parse target dependencies %v", err)
 	}
 
 	mismatched := deps.Mismatched(ownDeps, parentDeps)
