@@ -1,6 +1,7 @@
 package deps
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +11,10 @@ import (
 )
 
 type Dependencies map[string]string
+
+type versionInfo struct {
+	Version string `json:"Version"`
+}
 
 // FromGomod returns a map of dependencies given the contents of a go.mod file.
 func FromGomod(gomod []byte) (Dependencies, error) {
@@ -29,6 +34,14 @@ func FromGomod(gomod []byte) (Dependencies, error) {
 // FromModule returns a map of dependencies for a given go module, given its name and version.
 // It retrieves the go.mod file from proxy.golang.org.
 func FromModule(pkg, version string) (Dependencies, error) {
+	var err error
+	if version == "latest" {
+		version, err = getLatestVersion(pkg)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	url := fmt.Sprintf("https://proxy.golang.org/%s/@v/%s.mod", pkg, version)
 
 	resp, err := http.Get(url)
@@ -63,4 +76,27 @@ func FromGomodFile(path string) (Dependencies, error) {
 	}
 
 	return FromGomod(data)
+}
+
+func getLatestVersion(pkg string) (string, error) {
+	url := fmt.Sprintf("https://proxy.golang.org/%s/@latest", pkg)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("requesting %q: %w", url, err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("%q returned unexpected status %d", url, resp.StatusCode)
+	}
+
+	latest := versionInfo{}
+	err = json.NewDecoder(resp.Body).Decode(&latest)
+	if err != nil {
+		return "", fmt.Errorf("decoding latest version info %w", err)
+	}
+
+	return latest.Version, nil
 }
